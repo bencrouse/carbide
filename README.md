@@ -68,6 +68,29 @@ Build:
 cmake --build build --config Debug
 ```
 
+## Makefile Workflow
+For local iteration, you can use the provided `Makefile`:
+
+```bash
+make configure JUCE_DIR=/absolute/path/to/JUCE
+make build
+make test
+make reload-au
+```
+
+Key targets:
+- `make configure` - CMake configure
+- `make build` - build AU + Standalone + tests
+- `make test` - run DSP tests
+- `make install-au` - copy AU to user Components folder
+- `make validate-au` - run `auval`
+- `make reload-au` - install + validate in one command
+
+Portable overrides:
+- `JUCE_DIR=/path/to/JUCE`
+- `CONFIG=Debug` or `CONFIG=Release`
+- `AU_INSTALL_DIR=/custom/components/path`
+
 ## Install in Logic Pro
 Copy built AU component:
 ```bash
@@ -114,3 +137,10 @@ Out of scope (current):
 - optional eco/high quality mode switch
 - richer preset metadata and audition tools
 - mode-specific transient models for stronger sonic contrast
+
+## Documentation
+- [CONTRIBUTING](./CONTRIBUTING.md)
+- [ARCHITECTURE](./ARCHITECTURE.md)
+- [Tuning Guide](./docs/TUNING_GUIDE.md)
+- [Logic Dev Loop](./docs/LOGIC_DEV_LOOP.md)
+- [Changelog](./CHANGELOG.md)
