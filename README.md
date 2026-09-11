@@ -140,7 +140,6 @@ Out of scope (current):
 
 ## Documentation
 - [CONTRIBUTING](./CONTRIBUTING.md)
-- [ARCHITECTURE](./ARCHITECTURE.md)
+- [Architecture](./docs/ARCHITECTURE.md)
 - [Tuning Guide](./docs/TUNING_GUIDE.md)
 - [Logic Dev Loop](./docs/LOGIC_DEV_LOOP.md)
-- [Changelog](./CHANGELOG.md)
