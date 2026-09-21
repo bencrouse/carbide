@@ -27,6 +27,7 @@ public:
     void trigger(int midiNote, float velocity) noexcept;
     float process() noexcept;
     bool isActive() const noexcept;
+    float getFundamentalHz() const noexcept;
 
 private:
     static constexpr double kTwoPi = 6.28318530717958647692;

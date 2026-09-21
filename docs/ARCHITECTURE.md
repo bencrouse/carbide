@@ -10,7 +10,7 @@
 - Test harness: standalone DSP sanity executable.
 
 ## Signal Flow
-1. MIDI note-on retriggers mono voice.
+1. MIDI note-on sets the equal-tempered fundamental pitch and retriggers the mono voice.
 2. Pitch envelope drives oscillator sweep.
 3. Amp envelope shapes body decay.
 4. Transient layer adds attack click/noise.
@@ -23,6 +23,7 @@
 ## Parameter Model
 Continuous macros:
 - `pitch`, `decay`, `punch`, `click`, `material`, `drive`, `tone`, `sub`, `output`
+- `pitch` applies a continuous +/-12-semitone transpose to the incoming MIDI note.
 
 Discrete character parameter:
 - `mode` (`Soft`, `Neutral`, `Hard`)
@@ -45,4 +46,3 @@ Current categories:
 - `carbide_AU` (AUv2 component)
 - `carbide_Standalone` (app)
 - `carbide_dsp_tests` (DSP regression checks)
-

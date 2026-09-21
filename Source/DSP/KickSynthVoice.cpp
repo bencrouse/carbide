@@ -23,8 +23,6 @@ void KickSynthVoice::setParams(const Params& newParams) noexcept
 
 void KickSynthVoice::trigger(const int midiNote, const float velocity) noexcept
 {
-    (void) midiNote;
-
     phase = 0.0f;
     subPhase = 0.0f;
     ampEnv = 1.0f;
@@ -35,10 +33,10 @@ void KickSynthVoice::trigger(const int midiNote, const float velocity) noexcept
     dampingLowpass = 0.0f;
     active = true;
 
-    // Drum synth behavior: keep a fixed musical root and use the Pitch macro for tuning.
-    constexpr float rootHz = 52.0f; // approx C1
-    const float semitone = (params.pitch * 24.0f) - 12.0f;
-    fundamentalHz = std::clamp(rootHz * std::pow(2.0f, semitone / 12.0f), 30.0f, 180.0f);
+    constexpr float a4Hz = 440.0f;
+    const float transposeSemitones = (params.pitch * 24.0f) - 12.0f;
+    const float noteSemitonesFromA4 = static_cast<float>(std::clamp(midiNote, 0, 127) - 69);
+    fundamentalHz = a4Hz * std::pow(2.0f, (noteSemitonesFromA4 + transposeSemitones) / 12.0f);
     velocityGain = std::clamp(0.2f + (velocity * velocity * 0.9f), 0.2f, 1.1f);
 }
 
@@ -60,6 +58,11 @@ float KickSynthVoice::process() noexcept
 bool KickSynthVoice::isActive() const noexcept
 {
     return active;
+}
+
+float KickSynthVoice::getFundamentalHz() const noexcept
+{
+    return fundamentalHz;
 }
 
 float KickSynthVoice::renderAtOversampleStep() noexcept

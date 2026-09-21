@@ -48,6 +48,7 @@ public:
 
 private:
     KickSynthVoice::Params readSmoothedParams() noexcept;
+    KickSynthVoice::Params readTriggerParams() const noexcept;
     float renderVoiceSample() noexcept;
     void syncSmoothersFromParameters(bool forceCurrent) noexcept;
     int readMode() const noexcept;

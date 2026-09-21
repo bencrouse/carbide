@@ -8,9 +8,10 @@ This is not a general drum machine or modular synth. The project intentionally f
 ## Highlights
 - AUv2 instrument + Standalone app
 - Built for macOS 15+ (Sequoia), Apple Silicon
-- Mono one-shot voice (MIDI note-on retrigger model)
+- Mono one-shot voice with standard equal-tempered MIDI note tracking
 - 9 macro controls:
   - `pitch`, `decay`, `punch`, `click`, `material`, `drive`, `tone`, `sub`, `output`
+  - `pitch` continuously transposes the incoming MIDI note by +/-12 semitones
 - Character mode toggle: `Soft / Neutral / Hard`
 - Internal 2x render path with nonlinear stages and output safety clipping
 - Minimal fixed-size dark UI with preset selector, mode selector, output meter, and waveform preview
@@ -28,7 +29,7 @@ The project currently favors electronic/experimental kick aesthetics, but includ
 
 ## Architecture
 High-level signal flow:
-1. MIDI note-on retriggers a mono voice
+1. MIDI note-on sets the fundamental pitch and retriggers a mono voice
 2. Core oscillator body with pitch envelope + amp envelope
 3. Transient layer (noise/tone blend)
 4. Material morph (harmonic shaping)

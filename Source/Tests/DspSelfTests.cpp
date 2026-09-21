@@ -17,6 +17,71 @@ namespace
     return true;
 }
 
+float midiNoteToHz(const float midiNote) noexcept
+{
+    return 440.0f * std::pow(2.0f, (midiNote - 69.0f) / 12.0f);
+}
+
+int runMidiPitchTrackingChecks()
+{
+    KickSynthVoice voice;
+    voice.prepare(48000.0);
+    KickSynthVoice::Params params;
+    params.pitch = 0.5f;
+    voice.setParams(params);
+
+    voice.trigger(36, 1.0f);
+    const float note36Hz = voice.getFundamentalHz();
+    voice.trigger(48, 1.0f);
+    const float note48Hz = voice.getFundamentalHz();
+
+    if (std::abs(note36Hz - midiNoteToHz(36.0f)) > 0.001f
+        || std::abs(note48Hz - midiNoteToHz(48.0f)) > 0.001f
+        || std::abs((note48Hz / note36Hz) - 2.0f) > 0.0001f)
+    {
+        std::cerr << "FAIL: MIDI note tracking mismatch. note36=" << note36Hz
+                  << " note48=" << note48Hz << "\n";
+        return 1;
+    }
+
+    params.pitch = 0.0f;
+    voice.setParams(params);
+    voice.trigger(36, 1.0f);
+    const float downOctaveHz = voice.getFundamentalHz();
+
+    params.pitch = 1.0f;
+    voice.setParams(params);
+    voice.trigger(36, 1.0f);
+    const float upOctaveHz = voice.getFundamentalHz();
+
+    if (std::abs(downOctaveHz - midiNoteToHz(24.0f)) > 0.001f
+        || std::abs(upOctaveHz - midiNoteToHz(48.0f)) > 0.001f)
+    {
+        std::cerr << "FAIL: Pitch transpose mismatch. down=" << downOctaveHz
+                  << " up=" << upOctaveHz << "\n";
+        return 1;
+    }
+
+    params.pitch = 0.5f;
+    voice.setParams(params);
+    for (const int midiNote : { 0, 127 })
+    {
+        voice.trigger(midiNote, 1.0f);
+        for (int i = 0; i < 4096; ++i)
+        {
+            const float sample = voice.process();
+            if (! std::isfinite(sample) || std::abs(sample) > 0.98f)
+            {
+                std::cerr << "FAIL: Unsafe output at MIDI note " << midiNote << "\n";
+                return 1;
+            }
+        }
+    }
+
+    std::cout << "PASS: MIDI pitch tracking\n";
+    return 0;
+}
+
 int runKickRenderSmoke()
 {
     KickSynthVoice voice;
@@ -258,49 +323,55 @@ int runFactoryPresetChecks()
 
     for (const auto& preset : presets)
     {
-        KickSynthVoice voice;
-        voice.prepare(48000.0);
-
-        KickSynthVoice::Params params;
-        params.pitch = preset.values[0];
-        params.decay = preset.values[1];
-        params.punch = preset.values[2];
-        params.click = preset.values[3];
-        params.material = preset.values[4];
-        params.drive = preset.values[5];
-        params.tone = preset.values[6];
-        params.sub = preset.values[7];
-        params.output = preset.values[8];
-        params.mode = std::clamp(preset.mode, 0, 2);
-
-        voice.setParams(params);
-        voice.trigger(36, 1.0f);
-
-        float peak = 0.0f;
-        double sumSquares = 0.0;
-        for (int i = 0; i < 24000; ++i)
+        for (const int midiNote : { 24, 36, 48 })
         {
-            const float sample = voice.process();
-            if (! std::isfinite(sample))
+            KickSynthVoice voice;
+            voice.prepare(48000.0);
+
+            KickSynthVoice::Params params;
+            params.pitch = preset.values[0];
+            params.decay = preset.values[1];
+            params.punch = preset.values[2];
+            params.click = preset.values[3];
+            params.material = preset.values[4];
+            params.drive = preset.values[5];
+            params.tone = preset.values[6];
+            params.sub = preset.values[7];
+            params.output = preset.values[8];
+            params.mode = std::clamp(preset.mode, 0, 2);
+
+            voice.setParams(params);
+            voice.trigger(midiNote, 1.0f);
+
+            float peak = 0.0f;
+            double sumSquares = 0.0;
+            for (int i = 0; i < 24000; ++i)
             {
-                std::cerr << "FAIL: Non-finite sample in preset " << preset.name << "\n";
+                const float sample = voice.process();
+                if (! std::isfinite(sample))
+                {
+                    std::cerr << "FAIL: Non-finite sample in preset " << preset.name
+                              << " at MIDI note " << midiNote << "\n";
+                    return 1;
+                }
+                peak = std::max(peak, std::abs(sample));
+                sumSquares += static_cast<double>(sample * sample);
+            }
+
+            const float rms = std::sqrt(static_cast<float>(sumSquares / 24000.0));
+            if (peak > 0.98f)
+            {
+                std::cerr << "FAIL: Preset exceeds ceiling " << preset.name
+                          << " at MIDI note " << midiNote << " peak=" << peak << "\n";
                 return 1;
             }
-            peak = std::max(peak, std::abs(sample));
-            sumSquares += static_cast<double>(sample * sample);
-        }
 
-        const float rms = std::sqrt(static_cast<float>(sumSquares / 24000.0));
-        if (peak > 0.98f)
-        {
-            std::cerr << "FAIL: Preset exceeds ceiling " << preset.name << " peak=" << peak << "\n";
-            return 1;
-        }
-
-        if (peak < 0.08f || rms < 0.01f)
-        {
-            std::cerr << "FAIL: Preset too weak " << preset.name << " peak=" << peak << " rms=" << rms << "\n";
-            return 1;
+            if (peak < 0.08f || rms < 0.01f)
+            {
+                std::cerr << "FAIL: Preset too weak " << preset.name
+                          << " at MIDI note " << midiNote << " peak=" << peak << " rms=" << rms << "\n";
+                return 1;
+            }
         }
     }
 
@@ -312,6 +383,7 @@ int runFactoryPresetChecks()
 int main()
 {
     int failures = 0;
+    failures += runMidiPitchTrackingChecks();
     failures += runKickRenderSmoke();
     failures += runMonotonicityChecks();
     failures += runRetriggerCheck();

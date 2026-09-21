@@ -100,6 +100,7 @@ void CarbideAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
         if (message.isNoteOn())
         {
             const auto velocity = juce::jlimit(0.0f, 1.0f, message.getFloatVelocity());
+            voice.setParams(readTriggerParams());
             voice.trigger(message.getNoteNumber(), velocity);
         }
     }
@@ -291,6 +292,22 @@ KickSynthVoice::Params CarbideAudioProcessor::readSmoothedParams() noexcept
     p.tone = parameterSmoothers[6].getNextValue();
     p.sub = parameterSmoothers[7].getNextValue();
     p.output = parameterSmoothers[8].getNextValue();
+    p.mode = readMode();
+    return p;
+}
+
+KickSynthVoice::Params CarbideAudioProcessor::readTriggerParams() const noexcept
+{
+    KickSynthVoice::Params p;
+    p.pitch = rawParameterValues[0]->load();
+    p.decay = parameterSmoothers[1].getCurrentValue();
+    p.punch = parameterSmoothers[2].getCurrentValue();
+    p.click = parameterSmoothers[3].getCurrentValue();
+    p.material = parameterSmoothers[4].getCurrentValue();
+    p.drive = parameterSmoothers[5].getCurrentValue();
+    p.tone = parameterSmoothers[6].getCurrentValue();
+    p.sub = parameterSmoothers[7].getCurrentValue();
+    p.output = parameterSmoothers[8].getCurrentValue();
     p.mode = readMode();
     return p;
 }
