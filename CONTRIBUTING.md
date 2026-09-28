@@ -7,6 +7,8 @@ Thanks for contributing to `carbide`.
 - Prefer sound quality and musical behavior over feature count.
 - Preserve parameter IDs and automation compatibility.
 - Avoid regressions in preset behavior unless explicitly intended.
+- Treat Neutral renders as compatibility fixtures; update their test baselines only for an intentional sonic change.
+- Preserve `Soft=0`, `Neutral=1`, and `Hard=2`; mode is latched at note-on.
 
 ## Development Setup
 Prerequisites:
@@ -38,6 +40,9 @@ Expected DSP tests:
 - monotonicity checks
 - retrigger consistency
 - mode separation
+- Neutral render compatibility
+- mode latching and per-engine macro response
+- sample-rate and tail consistency
 - factory preset sanity
 
 ## PR Checklist
@@ -45,4 +50,3 @@ Expected DSP tests:
 - Note any preset changes clearly.
 - Mention whether `Neutral` mode behavior changed.
 - Include testing commands and outcomes.
-

@@ -45,6 +45,7 @@ CarbideAudioProcessor::CarbideAudioProcessor()
     for (const auto& preset : presets)
         presetNames.push_back(preset.name);
 
+    setLatencySamples(KickSynthVoice::getLatencySamples());
     applyPreset(0);
 }
 
@@ -157,7 +158,8 @@ bool CarbideAudioProcessor::isMidiEffect() const
 
 double CarbideAudioProcessor::getTailLengthSeconds() const
 {
-    return 0.5;
+    const double sampleRate = getSampleRate();
+    return KickSynthVoice::getMaximumTailSeconds(sampleRate > 0.0 ? sampleRate : 44100.0);
 }
 
 int CarbideAudioProcessor::getNumPrograms()

@@ -64,6 +64,8 @@ target_link_libraries(carbide
 )
 
 if(CARBIDE_BUILD_TESTS)
+    enable_testing()
+
     juce_add_console_app(carbide_dsp_tests
         PRODUCT_NAME "carbide_dsp_tests"
     )
@@ -87,4 +89,6 @@ if(CARBIDE_BUILD_TESTS)
             juce::juce_events
             juce::juce_audio_basics
     )
+
+    add_test(NAME carbide_dsp_tests COMMAND carbide_dsp_tests)
 endif()

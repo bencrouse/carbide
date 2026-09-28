@@ -12,8 +12,8 @@ This is not a general drum machine or modular synth. The project intentionally f
 - 9 macro controls:
   - `pitch`, `decay`, `punch`, `click`, `material`, `drive`, `tone`, `sub`, `output`
   - `pitch` continuously transposes the incoming MIDI note by +/-12 semitones
-- Character mode toggle: `Soft / Neutral / Hard`
-- Internal 2x render path with nonlinear stages and output safety clipping
+- Three character engines selected by `Soft / Neutral / Hard`
+- Internal 2x render path with shared filtered decimation and host-reported latency
 - Minimal fixed-size dark UI with preset selector, mode selector, output meter, and waveform preview
 - 25 factory presets organized by category:
   - `Core`, `Click`, `Weight`, `Edge`, `Soft`
@@ -35,14 +35,21 @@ High-level signal flow:
 4. Material morph (harmonic shaping)
 5. Drive stage
 6. Tone shaping
-7. Mode shaping (`Soft/Neutral/Hard`)
+7. Mode-specific body, transient, saturation, and damping topology
 8. Safety output stage (soft clip + ceiling)
+
+Character engines:
+- `Soft`: rounded sine-led body, filtered excitation, restrained pitch motion, and gentle asymmetric saturation
+- `Neutral`: the original tight, broadly useful carbide voice
+- `Hard`: phase-distorted harmonic body, independent high-frequency transient oscillator, and aggressive asymmetric saturation
+
+Mode selection is latched at note-on so one kick cannot switch synthesis engines partway through its tail.
 
 Implementation choices:
 - JUCE CMake project (AU + Standalone only)
 - APVTS for host automation/state
 - Sample-by-sample parameter smoothing for click-safe automation
-- Choice parameter for mode, with explicit preset default mode assignment
+- Trigger-latched choice parameter for mode, with explicit preset default mode assignment
 - Internal test binary for deterministic DSP sanity checks
 
 ## Preset System
@@ -119,7 +126,12 @@ Current automated checks:
 - monotonic macro sanity (decay/punch behavior)
 - retrigger consistency
 - mode separation sanity
+- Neutral render compatibility
+- trigger-latched mode behavior
+- macro response in every engine
+- sample-rate and maximum-tail consistency
 - factory preset sanity (all presets render, level checks)
+- preset category identity and clipping occupancy
 
 ## Project Scope and Non-Goals
 In scope:
@@ -137,7 +149,7 @@ Out of scope (current):
 - category filter UI (instead of name-prefix browsing only)
 - optional eco/high quality mode switch
 - richer preset metadata and audition tools
-- mode-specific transient models for stronger sonic contrast
+- user preset save/load and compare workflow
 
 ## Documentation
 - [CONTRIBUTING](./CONTRIBUTING.md)

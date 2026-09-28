@@ -23,8 +23,10 @@ This runs:
 ## 4) Manual Checks
 - Preset browsing works and updates sound.
 - Mode toggle (`Soft/Neutral/Hard`) audibly changes character.
+- A mode change during a tail takes effect on the next note-on, without changing the active hit.
 - Automation on macro controls is click-safe.
 - Output level remains controlled at extreme settings.
+- Soft, Neutral, and Hard remain distinct when compared at matched loudness.
 
 ## Common Issues
 - Logic still using old plugin binary:
@@ -33,4 +35,3 @@ This runs:
   - Use Homebrew CMake or run with full path.
 - `auval` failure after binary changes:
   - Re-run `make reload-au` and re-open Logic.
-
