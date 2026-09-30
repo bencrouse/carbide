@@ -10,12 +10,28 @@ class CarbideAudioProcessorEditor final : public juce::AudioProcessorEditor,
 {
 public:
     explicit CarbideAudioProcessorEditor(CarbideAudioProcessor&);
-    ~CarbideAudioProcessorEditor() override = default;
+    ~CarbideAudioProcessorEditor() override;
 
     void paint(juce::Graphics&) override;
     void resized() override;
 
 private:
+    class InstrumentLookAndFeel final : public juce::LookAndFeel_V4
+    {
+    public:
+        void setMaterialMode(int mode) noexcept { materialMode = mode; }
+        void drawRotarySlider(juce::Graphics&, int, int, int, int, float, float, float, juce::Slider&) override;
+        void drawLinearSlider(juce::Graphics&, int, int, int, int, float, float, float,
+                              juce::Slider::SliderStyle, juce::Slider&) override;
+        void drawButtonBackground(juce::Graphics&, juce::Button&, const juce::Colour&, bool, bool) override;
+        void drawButtonText(juce::Graphics&, juce::TextButton&, bool, bool) override;
+        void drawComboBox(juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&) override;
+        juce::Font getComboBoxFont(juce::ComboBox&) override;
+
+    private:
+        int materialMode = 1;
+    };
+
     class WaveformComponent final : public juce::Component
     {
     public:
@@ -39,10 +55,13 @@ private:
 
     void timerCallback() override;
     void refreshPresetCombo();
+    void refreshModeButtons();
     void setupKnob(juce::Slider& slider, juce::Label& label, const juce::String& text, const juce::String& paramId);
 
     CarbideAudioProcessor& audioProcessor;
+    InstrumentLookAndFeel instrumentLookAndFeel;
     juce::ComboBox modeBox;
+    std::array<juce::TextButton, 3> modeButtons;
     juce::ComboBox presetBox;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> modeAttachment;
 

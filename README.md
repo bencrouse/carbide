@@ -5,6 +5,8 @@ It is designed for fast iteration: load, tweak a few controls, and get productio
 
 This is not a general drum machine or modular synth. The project intentionally focuses on one job: powerful kick synthesis with low UI complexity and strong default sound.
 
+![carbide interface showing the Hard engine, Material body-shape control, and kick macros](docs/carbide-ui.png)
+
 ## Highlights
 - AUv2 instrument + Standalone app
 - Built for macOS 15+ (Sequoia), Apple Silicon
@@ -14,7 +16,7 @@ This is not a general drum machine or modular synth. The project intentionally f
   - `pitch` continuously transposes the incoming MIDI note by +/-12 semitones
 - Three character engines selected by `Soft / Neutral / Hard`
 - Internal 2x render path with shared filtered decimation and host-reported latency
-- Minimal fixed-size dark UI with preset selector, mode selector, output meter, and waveform preview
+- Fixed-size silver-and-black instrument UI with a three-state engine selector, a draggable Material body-shape view, Punch and Tone gestures, output meter, and waveform preview
 - 25 factory presets organized by category:
   - `Core`, `Click`, `Weight`, `Edge`, `Soft`
 
